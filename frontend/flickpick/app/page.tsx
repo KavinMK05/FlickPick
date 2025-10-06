@@ -1,151 +1,126 @@
-"use client"
-import Image from "next/image";
-import { SetStateAction, useState } from "react";
+"use client";
 
-export default function Home() {
-  const movies = [
-    {
-      id: 1,
-      poster: "https://via.placeholder.com/200x300/333/fff?text=Movie+1",
-    },
-    {
-      id: 2,
-      poster: "https://via.placeholder.com/200x300/333/fff?text=Movie+2",
-    },
-    {
-      id: 3,
-      poster: "https://via.placeholder.com/200x300/333/fff?text=Movie+3",
-    },
-    {
-      id: 4,
-      poster: "https://via.placeholder.com/200x300/333/fff?text=Movie+4",
-    },
-    {
-      id: 5,
-      poster: "https://via.placeholder.com/200x300/333/fff?text=Movie+5",
-    },
-  ];
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
-  const series = [
-    {
-      id: 1,
-      poster: "https://via.placeholder.com/200x300/666/fff?text=Series+1",
-    },
-    {
-      id: 2,
-      poster: "https://via.placeholder.com/200x300/666/fff?text=Series+2",
-    },
-    {
-      id: 3,
-      poster: "https://via.placeholder.com/200x300/666/fff?text=Series+3",
-    },
-    {
-      id: 4,
-      poster: "https://via.placeholder.com/200x300/666/fff?text=Series+4",
-    },
-    {
-      id: 5,
-      poster: "https://via.placeholder.com/200x300/666/fff?text=Series+5",
-    },
-  ];
-  const [activeTab, setActiveTab] = useState("movies");
-  const [currentIndex, setCurrentIndex] = useState(0);
+const MOVIES = [
+  { title: "Inception" },
+  { title: "The Dark Knight" },
+  { title: "Interstellar" },
+  { title: "Parasite" },
+  { title: "The Godfather" },
+  { title: "Pulp Fiction" },
+  { title: "Forrest Gump" },
+  { title: "The Matrix" },
+  { title: "Goodfellas" },
+  { title: "Se7en" },
+];
 
-  const data = activeTab === "movies" ? movies : series;
-  const totalItems = data.length;
+export default function MovieCarousel() {
+  const [activeIndex, setActiveIndex] = useState(0);
 
-  // Handle previous button
-  const handlePrevious = () => {
-    setCurrentIndex((prev) => (prev === 0 ? totalItems - 1 : prev - 1));
-  };
-
-  // Handle next button
   const handleNext = () => {
-    setCurrentIndex((prev) => (prev === totalItems - 1 ? 0 : prev + 1));
+    setActiveIndex((prevIndex) => (prevIndex + 1) % MOVIES.length);
   };
 
-  // Handle tab switch
-  const handleTabSwitch = (tab: SetStateAction<string>) => {
-    setActiveTab(tab);
-    setCurrentIndex(0); // Reset carousel on tab change
+  const handlePrev = () => {
+    setActiveIndex(
+      (prevIndex) => (prevIndex - 1 + MOVIES.length) % MOVIES.length
+    );
   };
 
-  // Carousel transform style (Tailwind doesn't support dynamic transforms easily, so keep inline style)
-  const carouselStyle = {
-    transform: `translateX(-${currentIndex * (100 / 5)}%)`, // Assuming 5 items visible, adjust width as needed
-    transition: "transform 0.3s ease",
+  const getCardPosition = (index: number) => {
+    const offset = index - activeIndex;
+    const total = MOVIES.length;
+
+    // Handle wrapping for positive and negative offsets
+    let normalizedOffset = offset;
+    if (offset > total / 2) {
+      normalizedOffset -= total;
+    } else if (offset < -total / 2) {
+      normalizedOffset += total;
+    }
+
+    if (normalizedOffset === 0) return "center";
+    if (normalizedOffset === 1) return "right";
+    if (normalizedOffset === -1) return "left";
+    if (normalizedOffset === 2) return "farRight";
+    if (normalizedOffset === -2) return "farLeft";
+    
+    // For cards further out, we determine if they are entering from 'preFarLeft' or 'preFarRight'
+    // This is the key change to control their entry point
+    if (normalizedOffset === -3) return "preFarLeft"; // When moving left, this will become farLeft
+    if (normalizedOffset === 3) return "preFarRight"; // When moving right, this will become farRight
+
+    return "hidden"; // Default for all other states
   };
+
+  const cardVariants = {
+    // New states for entry/exit
+    preFarLeft: { x: "-600px", scale: 0.1, opacity: 0, zIndex: 0 }, // Starts far left, off-screen
+    preFarRight: { x: "600px", scale: 0.1, opacity: 0, zIndex: 0 }, // Starts far right, off-screen
+    
+    center: { x: 0, scale: 1, zIndex: 5, opacity: 1 },
+    left: { x: "-150px", scale: 0.8, zIndex: 3, opacity: 0.7 },
+    right: { x: "150px", scale: 0.8, zIndex: 3, opacity: 0.7 },
+    farLeft: { x: "-300px", scale: 0.6, zIndex: 1, opacity: 0.4 },
+    farRight: { x: "300px", scale: 0.6, zIndex: 1, opacity: 0.4 },
+    hidden: { scale: 0, opacity: 0, zIndex: 0, x: 0 }, // Default hidden state
+  };
+
   return (
-    <div className="h-screen w-screen ">
-      <div className="bg-black text-white min-h-screen flex flex-col p-5 font-sans">
-        {/* Top Navigation */}
-        <header className="flex justify-between items-center mb-5">
-          <h1 className="text-2xl font-bold">FlickPick</h1>
-          <div className="flex space-x-2">
-            <button
-              className={`px-5 py-2 rounded-full cursor-pointer transition-colors ${
-                activeTab === "movies"
-                  ? "bg-gray-600"
-                  : "bg-gray-700 hover:bg-gray-600"
-              }`}
-              onClick={() => handleTabSwitch("movies")}
-            >
-              Movies
-            </button>
-            <button
-              className={`px-5 py-2 rounded-full cursor-pointer transition-colors ${
-                activeTab === "series"
-                  ? "bg-gray-600"
-                  : "bg-gray-700 hover:bg-gray-600"
-              }`}
-              onClick={() => handleTabSwitch("series")}
-            >
-              TV series
-            </button>
-          </div>
-        </header>
+    <div className="flex flex-col h-screen w-screen bg-black text-white overflow-hidden">
+      <div className="flex w-full h-auto py-6 font-bold text-xl justify-center items-center">
+        FlickPick
+      </div>
 
-        {/* Carousel Middle Area */}
-        <main className="flex-1 overflow-hidden my-5">
-          <div className="w-full overflow-hidden">
-            <div
-              className="flex w-[500%] h-80 transition-transform duration-300 ease-in-out"
-              style={carouselStyle}
-            >
-              {data.map((item) => (
-                <div key={item.id} className="flex-0 flex-[20%] p-2.5">
-                  <img
-                    src={item.poster}
-                    alt={`${activeTab} ${item.id}`}
-                    className="w-full h-full object-cover rounded-lg"
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-        </main>
+      <div className="relative flex-1 flex justify-center items-center">
+        <div className="relative h-[400px] w-full">
+          <AnimatePresence initial={false}> {/* initial={false} prevents initial animation on mount */}
+            {MOVIES.map((movie, index) => {
+              const position = getCardPosition(index);
+              
+              // Only render visible cards to optimize performance and prevent unnecessary DOM elements
+              if (position === "hidden") return null;
 
-        {/* Bottom Buttons */}
-        <footer className="flex justify-center items-center gap-5 py-5">
-          <button
-            onClick={handlePrevious}
-            className="w-12 h-12 bg-gray-600 text-white rounded-full cursor-pointer text-xl flex items-center justify-center hover:bg-gray-500 transition-colors"
-          >
-            ←
-          </button>
-          <button className="w-12 h-12 bg-gray-500 text-white rounded-full cursor-pointer text-xl flex items-center justify-center hover:bg-gray-400 transition-colors">
-            +
-          </button>
-          <button className="w-12 h-12 bg-gray-500 text-white rounded-full cursor-pointer text-xl flex items-center justify-center hover:bg-gray-400 transition-colors">
-            👍
-          </button>
-          <button
-            onClick={handleNext}
-            className="w-12 h-12 bg-gray-600 text-white rounded-full cursor-pointer text-xl flex items-center justify-center hover:bg-gray-500 transition-colors"
-          >
-            →
-          </button>
-        </footer>
+              return (
+                <motion.div
+                  key={movie.title}
+                  className="absolute top-0 left-0 right-0 mx-auto h-[400px] w-[280px] rounded-3xl bg-neutral-800 border border-neutral-700 flex justify-center items-center text-2xl font-semibold"
+                  variants={cardVariants}
+                  initial={position === "farLeft" ? "preFarRight" : position === "farRight" ? "preFarLeft" : position === "preFarLeft" ? "preFarLeft" : position === "preFarRight" ? "preFarRight" : "hidden"} // This is the crucial part for initial entry point
+                  animate={position}
+                  exit={
+                    (position === "farLeft" || position === "preFarLeft") ? "preFarLeft" : 
+                    (position === "farRight" || position === "preFarRight") ? "preFarRight" : 
+                    "hidden" // Default exit to hidden
+                  }
+                  transition={{ duration: 0.4, ease: "easeInOut" }}
+                >
+                  {movie.title}
+                </motion.div>
+              );
+            })}
+          </AnimatePresence>
+        </div>
+      </div>
+
+      <div className="flex w-full h-auto mt-auto py-10 justify-center items-center space-x-5">
+        <button
+          onClick={handlePrev}
+          className="px-6 py-3 bg-neutral-700 rounded-full text-lg font-bold hover:bg-neutral-600 transition-colors"
+        >
+          Previous
+        </button>
+        <div className="w-18 h-12 bg-gray-100 rounded-[14px]"></div>
+
+        <div className="w-18 h-12 bg-gray-100 rounded-[14px]"></div> 
+        <button
+          onClick={handleNext}
+          className="px-6 py-3 bg-neutral-700 rounded-full text-lg font-bold hover:bg-neutral-600 transition-colors"
+        >
+          Next
+        </button>
       </div>
     </div>
   );
