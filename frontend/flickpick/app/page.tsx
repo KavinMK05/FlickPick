@@ -61,10 +61,10 @@ export default function MovieCarousel() {
     preFarRight: { x: "600px", scale: 0.1, opacity: 0, zIndex: 0 }, // Starts far right, off-screen
     
     center: { x: 0, scale: 1, zIndex: 5, opacity: 1 },
-    left: { x: "-150px", scale: 0.8, zIndex: 3, opacity: 0.7 },
-    right: { x: "150px", scale: 0.8, zIndex: 3, opacity: 0.7 },
-    farLeft: { x: "-300px", scale: 0.6, zIndex: 1, opacity: 0.4 },
-    farRight: { x: "300px", scale: 0.6, zIndex: 1, opacity: 0.4 },
+    left: { x: "-150px", scale: 0.8, zIndex: 3, opacity: 1 },
+    right: { x: "150px", scale: 0.8, zIndex: 3, opacity: 1 },
+    farLeft: { x: "-300px", scale: 0.6, zIndex: 1, opacity: 1},
+    farRight: { x: "300px", scale: 0.6, zIndex: 1, opacity: 1},
     hidden: { scale: 0, opacity: 0, zIndex: 0, x: 0 }, // Default hidden state
   };
 
