@@ -9,6 +9,7 @@ class Users(Base):
     user_name = Column(String(255), nullable=False)
     password = Column(String(45),nullable=False)
     watchlist_id = Column(Integer, ForeignKey("WatchList.watchlist_id"))
+    user_embedding = Column(JSON)
 
 class Recommendations(Base):
     __tablename__ ="Recommendations"    

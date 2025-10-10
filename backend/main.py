@@ -8,6 +8,7 @@ from database import get_db, Base, engine
 from models import Users, Recommendations, WatchList, Movies, Ratings
 from database import SessionLocal
 import random
+import numpy as np
 
 
 Base.metadata.create_all(bind=engine)
@@ -41,6 +42,12 @@ class RatingRequest(BaseModel):
     movie_id: int
     score: int
 
+class Movie(BaseModel):
+    movie_id:int
+    movie_name:str
+    
+
+SelectedMovies = list[Movie]
 
 def recommendation_engine(db: Session, user_id: str):
     existing_recommendations = (
@@ -127,12 +134,74 @@ def login(user: UserLogin, db: Session = Depends(get_db)):
 
 @app.get("/getRecommendations")
 def get_recommendations():
+
+    
     return None
+
+@app.get("/generateRecommendations")
+def generate_recommendations():
+    recommendations = []
+    test_user_id = "29c9bdff-ad30-42a7-946f-23fa0a10c19b"
+    with SessionLocal() as session:
+        all_movies = session.query(Movies).all()
+        user = session.query(Users).filter_by(user_id = test_user_id).first()
+        user_embed = user.user_embedding
+        user_vector = np.array(user_embed)
+        user_vector_magnitude = np.linalg.norm(user_vector)
+        for movie in all_movies:
+            movie_vector = np.array(movie.embeddings)
+            movie_vector_magnitude = np.linalg.norm(movie_vector)
+            dot_vector = np.dot(user_vector,movie_vector)
+            cosine_similarity = dot_vector / (user_vector_magnitude*movie_vector_magnitude)
+
+            movie_rec = {
+                "movie_id":movie.movie_id,
+                "movie_name":movie.movie_name,
+                "cosine_score":cosine_similarity
+            }
+            recommendations.append(movie_rec)
+        sorted_recommendations = sorted(recommendations,key=lambda user:user['cosine_score'],reverse=True)
+        return sorted_recommendations
+
+    return None 
+
 
 
 @app.get("/getWatchlist")
 def get_watchlist():
     return None
+
+@app.post("/createUserLikes")
+def set_userLikes(selected_movies:SelectedMovies):
+    all_selected_movies = []
+    test_user_id = "29c9bdff-ad30-42a7-946f-23fa0a10c19b"
+    
+    with SessionLocal() as session:
+        user = session.query(Users).filter_by(user_id = test_user_id).first()
+        
+        user_embed = user.user_embedding
+        if(not user_embed):
+            for i in selected_movies:
+                data = session.query(Movies).filter_by(movie_id=i.movie_id).first()
+                all_selected_movies.append(data)
+            
+            all_embeddings = [movie.embeddings for movie in all_selected_movies]
+
+            embeddings_array = np.array(all_embeddings)
+
+            average_embedding = np.mean(embeddings_array,axis=0)
+            
+            user.user_embedding= average_embedding.tolist()
+
+            session.commit()
+            return "Sucess"
+        else:
+            return "User embed already exists"
+
+        
+
+        
+
 
 
 @app.get("/getRandomMovies")
