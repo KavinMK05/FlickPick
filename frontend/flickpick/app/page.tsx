@@ -1,44 +1,43 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import axios from "axios";
 
-const MOVIES = [
-  { title: "Inception" },
-  { title: "The Dark Knight" },
-  { title: "Interstellar" },
-  { title: "Parasite" },
-  { title: "The Godfather" },
-  { title: "Pulp Fiction" },
-  { title: "Forrest Gump" },
-  { title: "The Matrix" },
-  { title: "Goodfellas" },
-  { title: "Se7en" },
-];
+interface MovieRecommendation {
+  movie_id: number;
+  movie_name: string;
+  backdrop_path: string;
+  cosine_score: number;
+}
 
 export default function MovieCarousel() {
   const [activeIndex, setActiveIndex] = useState(0);
+  const [recommendations, setRecommendations] = useState<MovieRecommendation[]>(
+    []
+  );
+  const [getNewRecommendations, setGetNewRecommendations] = useState(false);
 
   const handleNext = () => {
-    setActiveIndex((prevIndex) => (prevIndex + 1) % MOVIES.length);
+    setActiveIndex((prevIndex) => (prevIndex + 1) % recommendations.length);
   };
 
   const handlePrev = () => {
     setActiveIndex(
-      (prevIndex) => (prevIndex - 1 + MOVIES.length) % MOVIES.length
+      (prevIndex) =>
+        (prevIndex - 1 + recommendations.length) % recommendations.length
     );
+    
   };
 
   const getCardPosition = (index: number) => {
     const offset = index - activeIndex;
-    const total = MOVIES.length;
+    const total = recommendations.length;
 
-    // Handle wrapping for positive and negative offsets
+    // Normalize offset to smallest distance
     let normalizedOffset = offset;
-    if (offset > total / 2) {
-      normalizedOffset -= total;
-    } else if (offset < -total / 2) {
-      normalizedOffset += total;
+    if (Math.abs(offset) > total / 2) {
+      normalizedOffset = offset > 0 ? offset - total : offset + total;
     }
 
     if (normalizedOffset === 0) return "center";
@@ -46,27 +45,40 @@ export default function MovieCarousel() {
     if (normalizedOffset === -1) return "left";
     if (normalizedOffset === 2) return "farRight";
     if (normalizedOffset === -2) return "farLeft";
-    
-    // For cards further out, we determine if they are entering from 'preFarLeft' or 'preFarRight'
-    // This is the key change to control their entry point
-    if (normalizedOffset === -3) return "preFarLeft"; // When moving left, this will become farLeft
-    if (normalizedOffset === 3) return "preFarRight"; // When moving right, this will become farRight
 
-    return "hidden"; // Default for all other states
+    // Entry positions for navigation
+    if (normalizedOffset === -3) return "preFarLeft";
+    if (normalizedOffset === 3) return "preFarRight";
+
+    return "hidden";
   };
 
   const cardVariants = {
-    // New states for entry/exit
-    preFarLeft: { x: "-600px", scale: 0.1, opacity: 0, zIndex: 0 }, // Starts far left, off-screen
-    preFarRight: { x: "600px", scale: 0.1, opacity: 0, zIndex: 0 }, // Starts far right, off-screen
-    
+    preFarLeft: { x: "-600px", scale: 0.2, opacity: 0.1, zIndex: 2 }, // Elevated zIndex during entry
+    preFarRight: { x: "600px", scale: 0.2, opacity: 0.1, zIndex: 2 }, // Elevated zIndex during entry
+
     center: { x: 0, scale: 1, zIndex: 5, opacity: 1 },
     left: { x: "-150px", scale: 0.8, zIndex: 3, opacity: 1 },
     right: { x: "150px", scale: 0.8, zIndex: 3, opacity: 1 },
-    farLeft: { x: "-300px", scale: 0.6, zIndex: 1, opacity: 1},
-    farRight: { x: "300px", scale: 0.6, zIndex: 1, opacity: 1},
-    hidden: { scale: 0, opacity: 0, zIndex: 0, x: 0 }, // Default hidden state
+    farLeft: { x: "-300px", scale: 0.6, zIndex: 1, opacity: 1 }, // Reduced to allow entry override if needed
+    farRight: { x: "300px", scale: 0.6, zIndex: 1, opacity: 1 }, // Consistent with farLeft
+    hidden: { scale: 0, opacity: 0, zIndex: 0, x: 0 },
   };
+
+  async function getRecommendations() {
+    try {
+      let recommendations = await axios.get(
+        "http://127.0.0.1:8000/generateRecommendations"
+      );
+      setRecommendations(recommendations.data);
+    } catch (e) {
+      console.error("Failed to fetch movies:", e);
+    }
+  }
+
+  useEffect(() => {
+    getRecommendations();
+  }, [getNewRecommendations]);
 
   return (
     <div className="flex flex-col h-screen w-screen bg-black text-white overflow-hidden">
@@ -76,29 +88,42 @@ export default function MovieCarousel() {
 
       <div className="relative flex-1 flex justify-center items-center">
         <div className="relative h-[400px] w-full">
-          <AnimatePresence initial={false}> {/* initial={false} prevents initial animation on mount */}
-            {MOVIES.map((movie, index) => {
-              const position = getCardPosition(index);
+          <AnimatePresence initial={false}>
+            {recommendations.map((movie, index) => {
               
-              // Only render visible cards to optimize performance and prevent unnecessary DOM elements
+              const position = getCardPosition(index);
+
               if (position === "hidden") return null;
 
               return (
                 <motion.div
-                  key={movie.title}
-                  className="absolute top-0 left-0 right-0 mx-auto h-[400px] w-[280px] rounded-3xl bg-neutral-800 border border-neutral-700 flex justify-center items-center text-2xl font-semibold"
+                  key={movie.movie_name}
+                  className={`absolute top-0 left-0 right-0 mx-auto h-[400px] w-[280px] rounded-3xl bg-cover bg-center flex justify-center items-center text-2xl font-semibold`}
+                  style={{
+                    backgroundImage: `url(https://image.tmdb.org/t/p/w220_and_h330_face${movie.backdrop_path})`,
+                  }}
                   variants={cardVariants}
-                  initial={position === "farLeft" ? "preFarRight" : position === "farRight" ? "preFarLeft" : position === "preFarLeft" ? "preFarLeft" : position === "preFarRight" ? "preFarRight" : "hidden"} // This is the crucial part for initial entry point
+                  initial={
+                    position === "farLeft"
+                      ? "preFarRight"
+                      : position === "farRight"
+                      ? "preFarLeft"
+                      : position === "preFarLeft"
+                      ? "preFarLeft"
+                      : position === "preFarRight"
+                      ? "preFarRight"
+                      : "hidden"
+                  }
                   animate={position}
                   exit={
-                    (position === "farLeft" || position === "preFarLeft") ? "preFarLeft" : 
-                    (position === "farRight" || position === "preFarRight") ? "preFarRight" : 
-                    "hidden" // Default exit to hidden
+                    position === "farLeft" || position === "preFarLeft"
+                      ? "preFarLeft"
+                      : position === "farRight" || position === "preFarRight"
+                      ? "preFarRight"
+                      : "hidden"
                   }
-                  transition={{ duration: 0.4, ease: "easeInOut" }}
-                >
-                  {movie.title}
-                </motion.div>
+                  transition={{ duration: 0.6, ease: "easeInOut" }}
+                ></motion.div>
               );
             })}
           </AnimatePresence>
@@ -112,9 +137,19 @@ export default function MovieCarousel() {
         >
           Previous
         </button>
-        <div className="w-18 h-12 bg-gray-100 rounded-[14px]"></div>
+        <div
+          className="w-18 h-12 bg-red-100 rounded-[14px]"
+          onClick={() => {
+            setGetNewRecommendations(!getNewRecommendations);
+          }}
 
-        <div className="w-18 h-12 bg-gray-100 rounded-[14px]"></div> 
+        >
+          
+        </div>
+
+        <div className="flex justify-center items-center w-18 h-12 bg-gray-100 rounded-[14px]">
+          <img className="shrink-0 w-auto h-6" src={"like-1-svgrepo-com.svg"}/>
+        </div>
         <button
           onClick={handleNext}
           className="px-6 py-3 bg-neutral-700 rounded-full text-lg font-bold hover:bg-neutral-600 transition-colors"

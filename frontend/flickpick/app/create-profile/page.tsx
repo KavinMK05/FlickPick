@@ -104,11 +104,11 @@ export default function CreateProfile() {
                 // --- Add onClick handler ---
                 onClick={() => handleMovieSelect(item)}
                 // --- Apply styles based on whether it's selected ---
-                className={`w-36 h-54 rounded-2xl bg-cover bg-center cursor-pointer transition-all duration-200 ease-in-out
+                className={`w-36 h-[13.5rem] rounded-2xl bg-cover x bg-center cursor-pointer transition-all duration-200 ease-in-out
                   ${
                     isSelected
                       ? "border-4 border-blue-500 scale-105" // Style for selected
-                      : "border-2 border-transparent hover:scale-105" // Style for not selected
+                      : " border-transparent hover:scale-105" // Style for not selected
                   }
                 `}
                 style={{
@@ -122,7 +122,7 @@ export default function CreateProfile() {
         {selectedMovies.length > 0 && (
           <Link
             href="/"
-            className="mt-8 px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors cursor-pointer"
+            className="mt-8 px-6 py-2 bg-neutral-700 text-white font-semibold rounded-full hover:bg-neutral-800 transition-colors cursor-pointer"
             onClick={() => {
               createUserLike();
             }}

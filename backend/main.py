@@ -132,11 +132,7 @@ def login(user: UserLogin, db: Session = Depends(get_db)):
         raise
 
 
-@app.get("/getRecommendations")
-def get_recommendations():
 
-    
-    return None
 
 @app.get("/generateRecommendations")
 def generate_recommendations():
@@ -157,11 +153,13 @@ def generate_recommendations():
             movie_rec = {
                 "movie_id":movie.movie_id,
                 "movie_name":movie.movie_name,
-                "cosine_score":cosine_similarity
+                "cosine_score":cosine_similarity,
+                "backdrop_path":movie.backdrop_path,
+                
             }
             recommendations.append(movie_rec)
         sorted_recommendations = sorted(recommendations,key=lambda user:user['cosine_score'],reverse=True)
-        return sorted_recommendations
+        return sorted_recommendations[:20]
 
     return None 
 
