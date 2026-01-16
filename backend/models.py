@@ -34,6 +34,7 @@ class Movies(Base):
     genres = Column(String(255), nullable=False)
     backdrop_path = Column(String(100),nullable=False)
     embeddings = Column(JSON,nullable=False)
+    release_year = Column(Integer, nullable=True)
 
 class WatchList(Base):
     __tablename__ = "WatchList"
