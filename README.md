@@ -1,105 +1,115 @@
-# 🎬 Movie Recommendation App
+<div align="center">
+  <img src="./screenshot.png" alt="FlickPick Application Screenshot" width="800" style="border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+
+  <br />
+  <br />
+
+  <h1>🎬 FlickPick</h1>
+  <p><strong>Your Personalized Movie Discovery Companion</strong></p>
+  <p>
+    An intelligent, real-time movie recommendation engine powered by content-based machine learning.<br>
+    Experience instant, personalized suggestions based on your unique taste profile.
+  </p>
+
+  <div align="center">
+    <!-- Tech Stack Badges -->
+    <img src="https://ziadoua.github.io/m3-Markdown-Badges/badges/NextJS/nextjs2.svg" alt="Next.js" height="25">
+    <img src="https://ziadoua.github.io/m3-Markdown-Badges/badges/React/react2.svg" alt="React" height="25">
+    <img src="https://ziadoua.github.io/m3-Markdown-Badges/badges/TypeScript/typescript2.svg" alt="TypeScript" height="25">
+    <img src="https://ziadoua.github.io/m3-Markdown-Badges/badges/TailwindCSS/tailwindcss2.svg" alt="Tailwind CSS" height="25">
+    <br/>
+    <img src="https://ziadoua.github.io/m3-Markdown-Badges/badges/Python/python2.svg" alt="Python" height="25">
+    <img src="https://ziadoua.github.io/m3-Markdown-Badges/badges/FastAPI/fastapi2.svg" alt="FastAPI" height="25">
+    <img src="https://ziadoua.github.io/m3-Markdown-Badges/badges/MySQL/mysql2.svg" alt="MySQL" height="25">
+  </div>
+</div>
+
+---
 
 ## 📖 Overview
 
-This is a lightweight movie recommendation application that provides personalized suggestions using content-based machine learning. The system learns from user ratings in real-time, recommending movies similar to those the user enjoys based on genres and descriptions. Recommendations update instantly without requiring complex model training.
+**FlickPick** is not just another movie app—it's a sophisticated recommendation system designed for speed and accuracy. By leveraging **Sentence Transformers** and **cosine similarity**, FlickPick analyzes movie descriptions and genres to find hidden gems that match your preferences perfectly.
 
-The architecture emphasizes performance (responses under 100ms), simplicity, and scalability, handling thousands of movies efficiently. It features a responsive frontend for user interactions, a robust backend for logic and ML processing, and a relational database for data persistence.
+The system learns from your ratings in **real-time**. Every like, dislike, or star rating instantly refines your profile, ensuring that your next recommendation is better than the last.
 
-## ✨ Core Features
+## ✨ Key Features
 
-- **🔮 Personalized Recommendations**: Generates top movie suggestions based on user ratings, using cosine similarity on precomputed embeddings.
-- **⚡ Real-Time Updates**: Ratings immediately refine the user's profile, triggering refreshed recommendations.
-- **👤 User Management**: New users can register to receive a unique user ID for tracking preferences.
-- **📋 Movie Browsing**: View all movies with details like title, genre, and overview.
-- **⭐ Rating System**: Simple like/dislike or scored ratings (1-5) for movies.
+- **🔮 Smart Recommendations**: Advanced content-based filtering that understands the _nuance_ of movies, not just the genre.
+- **⚡ Instant Feedback Loop**: No waiting for nightly batch jobs. Rate a movie, and your feed updates immediately.
+- **🎨 Modern Data-Rich UI**: Built with **Next.js 15** and **Tailwind CSS 4**, featuring a beautiful dark-themed interface with smooth animations (Framer Motion).
+- **📋 Watchlist Management**: Keep track of what you want to see next.
+- **🔍 Deep Search**: Find movies by title, genre, or keywords.
 
-## 🛠️ Tech Stack
+## 🛠️ Technology Stack
 
-- **Frontend**: Next.js (with React and Tailwind CSS) for a responsive UI. 🌐
-- **Backend**: FastAPI (Python) for API endpoints and ML integration. 🐍
-- **Database**: MySQL for storing movies, user ratings, and profiles. 🗄️
-- **ML**: Sentence Transformers (e.g., all-MiniLM-L6-v2) for lightweight text embeddings; content-based filtering via vector similarity. 🤖
-- **Other**: Precomputed embeddings stored in memory for fast queries; data sourced from MovieLens or TMDB. 📊
+### Frontend
 
-## 🚀 Setup Instructions
+- **Framework**: [Next.js 15](https://nextjs.org/) (App Directory)
+- **Language**: [TypeScript](https://www.typescriptlang.org/)
+- **Styling**: [Tailwind CSS 4](https://tailwindcss.com/)
+- **Animations**: [Framer Motion](https://www.framer.com/motion/)
+- **Data Fetching**: [Axios](https://axios-http.com/)
+
+### Backend
+
+- **API**: [FastAPI](https://fastapi.tiangolo.com/) (High performance Python 3.10+ framework)
+- **Database**: [MySQL](https://www.mysql.com/) with SQLAlchemy ORM
+- **Machine Learning**: [Sentence Transformers](https://www.sbert.net/) (`all-MiniLM-L6-v2`) for vector embeddings.
+
+## 🚀 Getting Started
 
 ### Prerequisites
 
-- Node.js (v18+) 🟢
-- Python (3.10+) 🟢
-- MySQL (v8.0+) 🟢
-- Git 🟢
+- Node.js (v18+)
+- Python (3.10+)
+- MySQL Server
 
-### Installation
+### Installation Setup
 
-1. **Clone the Repository**:
+1. **Clone the Repository**
+
+   ```bash
+   git clone https://github.com/yourusername/flickpick.git
+   cd flickpick
    ```
-   git clone https://github.com/yourusername/movie-recommendation-app.git
-   cd movie-recommendation-app
+
+2. **Backend Setup**
+
+   ```bash
+   cd backend
+   python -m venv .venv
+   # Windows
+   .venv\Scripts\activate
+   # Mac/Linux
+   # source .venv/bin/activate
+   pip install -r requirements.txt
    ```
 
-2. **Backend Setup**:
-   - Install dependencies:
-     ```
-     cd backend
-     pip install -r requirements.txt
-     ```
-   - Configure MySQL:
-     - Create a database: `CREATE DATABASE movie_rec_db;`
-     - Update `config.py` with your MySQL credentials (host, user, password, database).
-     - Run migrations: `alembic upgrade head` (if using Alembic for schema management).
-   - Load initial movie data (run `python load_movies.py` to fetch and embed from TMDB/MovieLens).
-   - Start the server: `uvicorn main:app --reload --port 8000`
+   _Note: Ensure your MySQL server is running and `database.py` is configured correctly._
 
-3. **Frontend Setup**:
-   - Install dependencies:
-     ```
-     cd frontend
-     npm install
-     ```
-   - Update `.env.local` with backend URL (e.g., `NEXT_PUBLIC_API_URL=http://localhost:8000`).
-   - Start the development server: `npm run dev`
+   Start the API server:
 
-4. **Database Schema**:
-   - Tables: `movies` (ID, title, genre, overview, embedding), `users` (ID, created_at), `ratings` (user_id, movie_id, score).
+   ```bash
+   fastapi dev main.py
+   ```
 
-## 🎯 Usage
+3. **Frontend Setup**
 
-1. Access the app at `http://localhost:3000`.
-2. Register a new account to generate a user ID.
-3. Enter your user ID on the home page to fetch initial recommendations (popular movies for new users).
-4. Browse and rate movies; recommendations update dynamically.
-5. For API testing, use tools like Postman against `http://localhost:8000`.
+   ```bash
+   cd frontend/flickpick
+   pnpm install
+   pnpm dev
+   ```
 
-## 🔌 API Endpoints
-
-| Endpoint              | Method | Description                          | Parameters                  |
-|-----------------------|--------|--------------------------------------|-----------------------------|
-| `/movies`             | GET    | List all movies                      | None                        |
-| `/recommend`          | GET    | Get personalized recommendations     | `user_id` (query), `num=10` |
-| `/rate`               | POST   | Submit a movie rating                | JSON: `{user_id, movie_id, score}` |
-| `/register`           | POST   | Create new user and return user ID   | JSON: `{username}`          |
-
-## 🔄 Data Flow
-
-1. User registers and enters ID.
-2. Frontend requests recommendations via `/recommend`.
-3. Backend computes user profile from ratings, ranks movies by similarity, and responds.
-4. User rates via `/rate`; profile updates, triggering refetch.
-
-## ☁️ Deployment Notes
-
-- **Frontend**: Deploy to Vercel. 🚀
-- **Backend**: Deploy to Render or Heroku with MySQL add-on. 🛫
-- For production, add authentication (e.g., JWT) and caching.
+4. **Experience It**
+   Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ## 🤝 Contributing
 
-Fork the repo, create a branch, and submit a pull request. Ensure code adheres to PEP 8 and ESLint standards.
+Contributions are welcome! Please feel free to submit a Pull Request.
 
-## 📄 License
+---
 
-MIT License. See [LICENSE](LICENSE) for details.
-
-For questions, open an issue. ❓
+<div align="center">
+  <p>Generated by <strong>KavinMK05</strong></p>
+</div>
