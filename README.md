@@ -56,7 +56,11 @@ The system learns from your ratings in **real-time**. Every like, dislike, or st
 - **Database**: [MySQL](https://www.mysql.com/) with SQLAlchemy ORM
 - **Machine Learning**: [Sentence Transformers](https://www.sbert.net/) (`all-MiniLM-L6-v2`) for vector embeddings.
 
-## 🚀 Getting Started
+## � Dataset
+
+This project utilizes the [TMDB 930k Movie Dataset](https://www.kaggle.com/datasets/asaniczka/tmdb-movies-dataset-2023-930k-movies) from Kaggle for comprehensive movie metadata and descriptions.
+
+## �🚀 Getting Started
 
 ### Prerequisites
 
